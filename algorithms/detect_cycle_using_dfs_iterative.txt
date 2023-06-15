@@ -1,0 +1,100 @@
+To modify the DFS iterative method to detect cycles in a graph, you can use a technique called "coloring" to mark the status of each node during the traversal.
+
+Here's one possible algorithm:
+
+Initialize a stack to store the nodes to be visited and push the starting node onto the stack.
+While the stack is not empty, pop a node from the stack and mark it as "gray" to indicate that it is currently being visited.
+For each adjacent node of the current node, if it has not been visited, push it onto the stack and mark it as "gray".
+If an adjacent node is already marked as "gray", then a cycle has been detected, and you can return true to indicate that a cycle exists in the graph.
+After visiting all adjacent nodes of the current node, mark it as "black" to indicate that it has been fully explored.
+Repeat steps 2-5 until the stack is empty.
+If no cycles are detected after visiting all nodes, return false.
+Here, the "gray" color indicates that the node is currently being visited, and the "black" color indicates that it has been fully explored. If an adjacent node is already marked as "gray", then it is part of the current path being explored, and a cycle exists.
+
+//code
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_NODES 100
+
+// Define the colors of the nodes
+#define WHITE 0  // Unvisited
+#define GRAY 1   // Currently being visited
+#define BLACK 2  // Fully explored
+
+int adj[MAX_NODES][MAX_NODES]; // Adjacency matrix
+int color[MAX_NODES];          // Color of each node
+
+bool hasCycle(int start, int n) {
+    // Initialize the color of all nodes to WHITE
+    for (int i = 0; i < n; i++) {
+        color[i] = WHITE;
+    }
+    
+    // Initialize the stack to contain the starting node
+    int stack[MAX_NODES], top = 0;
+    stack[top++] = start;
+    
+    while (top > 0) {
+        int node = stack[--top];
+        
+        // Mark the current node as GRAY to indicate it is being visited
+        color[node] = GRAY;
+        
+        // Check all adjacent nodes of the current node
+        for (int adjNode = 0; adjNode < n; adjNode++) {
+            if (adj[node][adjNode]) {
+                if (color[adjNode] == WHITE) {
+                    // Mark the adjacent node as GRAY and add it to the stack
+                    color[adjNode] = GRAY;
+                    stack[top++] = adjNode;
+                } else if (color[adjNode] == GRAY) {
+                    // If the adjacent node is already marked as GRAY, then a cycle exists
+                    return true;
+                }
+            }
+        }
+        
+        // Mark the current node as BLACK to indicate it has been fully explored
+        color[node] = BLACK;
+    }
+    
+    // If no cycles are detected, return false
+    return false;
+}
+
+int main() {
+    // Sample graph represented as an adjacency matrix
+    int n = 6;
+    int graph[MAX_NODES][MAX_NODES] = {
+        {0, 1, 0, 0, 0, 0},
+        {0, 0, 1, 1, 0, 0},
+        {0, 0, 0, 0, 1, 0},
+        {0, 0, 0, 0, 1, 1},
+        {0, 0, 0, 0, 0, 1},
+        {0, 0, 0, 0, 0, 0}
+    };
+    
+    // Convert the adjacency matrix to a boolean adjacency matrix
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            adj[i][j] = (graph[i][j] != 0);
+        }
+    }
+    
+    // Check if the graph has a cycle
+    if (hasCycle(0, n)) {
+        printf("The graph has a cycle\n");
+    } else {
+        printf("The graph does not have a cycle\n");
+    }
+    
+    return 0;
+}
+
+ 
+//
+
+For undirected graphs, the algorithm will detect cycles in the graph if a node is visited twice during the traversal, since in an undirected graph a cycle is formed whenever a back edge is encountered.
+
+For directed graphs, the algorithm will detect cycles in the graph if a node is visited twice during the traversal, but only if the second visit is made to a node that is still in the "gray" state (i.e., being currently visited). In a directed graph, a cycle is formed when a back edge is encountered, but only if the back edge points to a node that is still in the "gray" state, which means that the node is still being visited as part of the current traversal path.
